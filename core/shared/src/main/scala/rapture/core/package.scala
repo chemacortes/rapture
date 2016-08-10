@@ -1,20 +1,24 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+ */
+
 package rapture.core
 
 import language.higherKinds
 import language.experimental.macros
-import reflect.runtime._
 import reflect.runtime.universe._
 import reflect.ClassTag
 
@@ -34,27 +38,29 @@ object `package` {
   def indentTree(s: String): String = {
     var indent = 0
     s flatMap {
-      case '(' => indent += 1; s"(\n${"  "*indent}"
-      case ')' => indent -= 1; s"\n${"  "*indent})"
-      case ',' => s",\n${"  "*(indent - 1)}"
+      case '(' => indent += 1; s"(\n${"  " * indent}"
+      case ')' => indent -= 1; s"\n${"  " * indent})"
+      case ',' => s",\n${"  " * (indent - 1)}"
       case ' ' => ""
       case o => o.toString
     }
   }
 
   implicit class EnrichedCollection[Coll[X] <: Seq[X]](val coll: Coll[String]) extends AnyVal {
-    def mapAs[T](implicit parser: StringParser[T], cbf: CanBuildFrom[Coll[String], T, Coll[T]], mode: Mode[`Seq#mapAs`]):
-        mode.Wrap[Coll[T], parser.Throws] = mode.wrap[Coll[T], parser.Throws] {
+    def mapAs[T](implicit parser: StringParser[T],
+                 cbf: CanBuildFrom[Coll[String], T, Coll[T]],
+                 mode: Mode[`Seq#mapAs`]): mode.Wrap[Coll[T], parser.Throws] = mode.wrap[Coll[T], parser.Throws] {
       val b = cbf(coll)
-      coll foreach { x => b += mode.unwrap(parser.parse(x, mode)) }
+      coll foreach { x =>
+        b += mode.unwrap(parser.parse(x, mode))
+      }
       b.result
     }
   }
 
   private[rapture] type implicitNotFound = annotation.implicitNotFound
 
-  private[rapture] implicit val implicitConversions: languageFeature.implicitConversions =
-    language.implicitConversions
+  private[rapture] implicit val implicitConversions: languageFeature.implicitConversions = language.implicitConversions
 
   @inline
   final def ?[T](implicit t: T) = t
@@ -69,9 +75,9 @@ object `package` {
     val t = System.currentTimeMillis
     (blk, ?[TimeSystem.ByDuration[D]].duration(t, System.currentTimeMillis))
   }
- 
+
   def enumerateMembers[T] = new Enumerator[T]
-  
+
   @inline
   implicit class SeqExtras[A, C[A] <: Seq[A]](val xs: C[A]) {
 
@@ -103,13 +109,16 @@ object `package` {
     /** Convenience method for zipping a sequence with a value derived from each element. */
     def zipWith[T](fn: A => T)(implicit bf: CanBuildFrom[C[A], (A, T), C[(A, T)]]): C[(A, T)] = {
       val b = bf(xs)
-      xs.foreach { x => b += ((x, fn(x))) }
+      xs.foreach { x =>
+        b += ((x, fn(x)))
+      }
       b.result
     }
   }
 
   implicit class EnrichedCollectionCompanion[+C[X] <: collection.GenTraversable[X]](
-      val cc: collection.generic.GenericCompanion[C]) extends AnyVal {
+      val cc: collection.generic.GenericCompanion[C])
+      extends AnyVal {
     def strap[T](xs: Strapped[T]*): C[T] = {
       val b = cc.newBuilder[T]
       xs foreach { b ++= _.elems }
@@ -137,9 +146,9 @@ trait `Seq#mapAs` extends MethodConstraint
 trait `String#as` extends MethodConstraint
 
 private[core] object Strapped {
-  implicit def toStrapped[T](t: T): Strapped[T] = Strapped(List(t))
-  implicit def toStrapped[T](elems: Iterable[T]): Strapped[T] = Strapped(elems)
-  implicit def toStrapped[T](opt: Option[T]): Strapped[T] = Strapped(opt.toList)
+  implicit def basicStrapping[T](t: T): Strapped[T] = Strapped(List(t))
+  implicit def iterableStrapping[T](elems: Iterable[T]): Strapped[T] = Strapped(elems)
+  implicit def optionStrapping[T](opt: Option[T]): Strapped[T] = Strapped(opt.toList)
 }
 
 private[core] case class Strapped[+T](elems: Iterable[T]) extends AnyVal
@@ -151,4 +160,3 @@ private[core] class Enumerator[T] {
 private[core] class Modal[G <: MethodConstraint, E <: Exception] {
   def apply[T](fn: => T)(implicit mode: Mode[G], typeTag: TypeTag[E]): mode.Wrap[T, E] = mode.wrap(fn)
 }
-

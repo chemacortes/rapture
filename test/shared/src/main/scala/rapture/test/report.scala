@@ -1,15 +1,20 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+ */
+
 package rapture.test
 
 import rapture.text._
@@ -29,10 +34,10 @@ trait Reporter {
 }
 
 class BasicReporter(width: Int, out: PrintStream) extends Reporter {
- 
+
   private var spaceAbove = false
   def mkSpace() = {
-    if(!spaceAbove) out.println()
+    if (!spaceAbove) out.println()
     spaceAbove = true
   }
   def output(text: String) {
@@ -57,8 +62,8 @@ class BasicReporter(width: Int, out: PrintStream) extends Reporter {
 
   def completeTask(tag: Tag, result: TestResult)(implicit tty: ansi.Tty): Unit = synchronized {
     val t = System.currentTimeMillis - tag.t0
-    out.print(" "*(width - tag.text.length - 20))
-    val pad = " "*(5 - t.toString.length)
+    out.print(" " * (width - tag.text.length - 20))
+    val pad = " " * (5 - t.toString.length)
     val colorText = result match {
       case Success => s"${ansi.green}SUCCESS"
       case Failure(msg) => s"${ansi.yellow}FAILURE"
@@ -70,8 +75,8 @@ class BasicReporter(width: Int, out: PrintStream) extends Reporter {
   }
 
   def report(text: String, inset: Boolean = false)(implicit tty: ansi.Tty) = {
-    val indent = if(inset) s"    ${ansi.boldBlue}" else ansi.normal
-    text split "\n"  flatMap (_.grouped(width - 25)) map (indent+_) foreach output
+    val indent = if (inset) s"    ${ansi.boldBlue}" else ansi.normal
+    text split "\n" flatMap (_.grouped(width - 25)) map (indent + _) foreach output
   }
 
   def summary(status: Int, text: String)(implicit tty: ansi.Tty) = {
@@ -80,9 +85,13 @@ class BasicReporter(width: Int, out: PrintStream) extends Reporter {
       case 0 => ansi.yellow
       case _ => ansi.red
     }
-    text grouped (width - 4) foreach { ln => output(s" ${color}* ${ansi.normal}${ln}") }
+    text grouped (width - 4) foreach { ln =>
+      output(s" ${color}* ${ansi.normal}${ln}")
+    }
   }
 
   def title(text: String)(implicit tty: ansi.Tty) =
-    text grouped (width - 4) foreach { ln => output(s" ${ansi.green}* ${ansi.normal}${ln}") }
+    text grouped (width - 4) foreach { ln =>
+      output(s" ${ansi.green}* ${ansi.normal}${ln}")
+    }
 }

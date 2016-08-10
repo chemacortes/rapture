@@ -1,15 +1,20 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+ */
+
 package rapture.http
 
 /*import rapture.io._
@@ -19,7 +24,7 @@ import rapture.mime._
 import rapture.uri._
 import rapture.html._
 
-import htmlSyntax.{Link => _, _}
+import htmlSyntax._
 
 object Layout {
 
@@ -46,7 +51,7 @@ object Layout {
         "jquery-ui.min.js"
     
     override def scripts: List[Element[Metadata]] =
-      Script(scriptType = `text/javascript`, src = Link(jQueryUiLocation.schemeSpecificPart)) :: super.scripts
+      Script(scriptType = `text/javascript`, src = PathLink(jQueryUiLocation.schemeSpecificPart)) :: super.scripts
   }
 
   trait JQuery extends Page {
@@ -54,7 +59,7 @@ object Layout {
     def jQueryLocation: HttpUrl = Http / "ajax.googleapis.com" / "ajax" / "libs" / "jquery" / "1.7.2" / "jquery.min.js"
 
     override def scripts: List[Element[Metadata]] =
-      Script(scriptType = `text/javascript`, src = Link(jQueryLocation.schemeSpecificPart)) :: super.scripts
+      Script(scriptType = `text/javascript`, src = PathLink(jQueryLocation.schemeSpecificPart)) :: super.scripts
   }
 
   abstract class Page { page =>
@@ -64,13 +69,13 @@ object Layout {
     def doctype = "<!DOCTYPE html>"
 
     def stylesheets: List[Stylesheet] = Nil
-    case class Stylesheet(link: Link)
+    case class Stylesheet(link: PathLink)
 
     def lang: String = "en"
     def title: String
 
     def links: List[Element[Metadata]] =
-      stylesheets map { ss => htmlSyntax.Link(rel = "stylesheet", href = ss.link)() }
+      stylesheets map { ss => Link(rel = "stylesheet", href = ss.link)() }
     
     def scripts: List[Element[Metadata]] = Nil
     def styles: List[Element[Metadata]] = Nil
@@ -100,7 +105,7 @@ object Layout {
     def bootstrapLocation = Http / "twitter.github.com" / "bootstrap" / "1.4.0" / "bootstrap.min.css"
 
     override def links: List[Element[Metadata]] =
-      htmlSyntax.Link(rel = "stylesheet", href = bootstrapLocation)() :: super.links
+      Link(rel = "stylesheet", href = bootstrapLocation)() :: super.links
 
   }
 
@@ -108,7 +113,7 @@ object Layout {
    
   trait TinyMce extends Page {
 
-    def tinyMceLocation: Link
+    def tinyMceLocation: PathLink
 
     override def scripts: List[Element[Metadata]] =
       Script(scriptType = `text/javascript`, src = tinyMceLocation)() :: super.links

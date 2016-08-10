@@ -1,25 +1,28 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+*/
+
 package rapture.json.test
 
 import rapture.core._
 import rapture.json._
-import rapture.data.{Parser, DataTypes}
+import rapture.data.{DataTypes, Parser}
 import rapture.test._
 
 import scala.util
-
-import org.scalatest._
 
 class TestRun extends Programme {
   include(PlayTests)
@@ -58,7 +61,6 @@ object MutableArgonautTests extends MutableJsonTests(argonaut.implicitJsonAst, a
 object MutableCirceTests extends MutableJsonTests(circe.implicitJsonAst, circe.implicitJsonStringParser)
 object MutableLiftTests extends MutableJsonTests(lift.implicitJsonAst, lift.implicitJsonStringParser)
 
-
 case class Foo(alpha: String, beta: Int)
 case class Bar(foo: Foo, gamma: Double)
 
@@ -74,6 +76,7 @@ case class C(c: D)
 case class D(d: E)
 case class E(e: F)
 case class F(f: Int)
+case class FooDefaultOption(param1: Option[String] = None, param2: Option[Int] = None)
 
 abstract class JsonTests(ast: JsonAst, parser: Parser[String, JsonAst]) extends TestSuite {
 
@@ -90,12 +93,15 @@ abstract class JsonTests(ast: JsonAst, parser: Parser[String, JsonAst]) extends 
     "bar": { "foo": { "alpha": "test2", "beta": 2 }, "gamma": 2.7 },
     "baz": { "alpha": "test" },
     "baz2": { "alpha": "test", "beta": 7 },
-    "self": 0
+    "self": 0,
+    "boo": null,
+    "booInner": {"foo": null, "bar": "value"}
   }"""
 
   val `Extract Int` = test {
     source1.int.as[Int]
   } returns 42
+  
   val `Extract value called "self"` = test {
     source1.self.as[Int]
   } returns 0
@@ -164,8 +170,38 @@ abstract class JsonTests(ast: JsonAst, parser: Parser[String, JsonAst]) extends 
     source1.bar.foo.alpha.as[String]
   } returns "test2"
 
-  // For some reason these two tests work fine in the REPL, but not here.
-  /*
+  val `Extract null element` = test {
+    source1.boo.as[Null]
+  } returns null
+
+  val `Extract null element from inner value` = test {
+    source1.booInner.foo.as[Null]
+  } returns null
+
+  val `Try to extract null element from not null inner value` = test {
+    source1.booInner.bar.as[Null]
+  } throws TypeMismatchException(DataTypes.String, DataTypes.Null)
+
+  val `Try to extract null element from not null value` = test {
+    source1.double.as[Null]
+  } throws TypeMismatchException(DataTypes.Number, DataTypes.Null)
+
+  val `Match null element` = test {
+    source1 match {
+      case json""" { "boo": $h } """ => h.as[Null]
+    }
+  } returns null
+
+  val `Match inner null element` = test {
+    source1 match {
+      case json""" { "booInner": {"foo": $h } } """ => h.as[Null]
+    }
+  } returns null
+
+  val `Extract long element` = test {
+    source1.int.as[Long]
+  } returns 42L
+  
   val `Extract missing value with case class default` = test {
     json"""{"beta": 0}""".as[HasDefault]
   } returns HasDefault("yes", 0)
@@ -173,8 +209,7 @@ abstract class JsonTests(ast: JsonAst, parser: Parser[String, JsonAst]) extends 
   val `Extract missing value with case class default 2` = test {
     json"""{"alpha": "no"}""".as[HasDefault2]
   } returns HasDefault2("no", 1)
-  */
-  
+ 
   val `Extract case class ignoring default value` = test {
     json"""{"alpha": "no", "beta": 0}""".as[HasDefault2]
   } returns HasDefault2("no", 0)
@@ -239,15 +274,15 @@ abstract class JsonTests(ast: JsonAst, parser: Parser[String, JsonAst]) extends 
 
   val `Serialize string` = test {
     Json("Hello World!").toString
-  } returns """"Hello World!""""
+  } returns "json\"\"\"\"Hello World!\"\"\"\""
 
   val `Serialize int` = test {
     Json(1648).toString
-  } returns "1648"
+  } returns "json\"\"\"1648\"\"\""
 
   val `Serialize array` = test {
     Json(List(1, 2, 3)).toString
-  } returns "[1,2,3]"
+  } returns "json\"\"\"[1,2,3]\"\"\""
 
   val `Serialize object` = test {
     import formatters.humanReadable._
@@ -273,11 +308,46 @@ abstract class JsonTests(ast: JsonAst, parser: Parser[String, JsonAst]) extends 
     j.as[Option[String]]
   } returns None
 
-  // Reported by @ajrnz
   val `Tabs should be escaped when serializing strings` = test {
     Json("\t").toString
-  } returns """"\t""""
+  } returns "json\"\"\"\"\\t\"\"\"\""
 
+  val `Extract Byte` = test {
+    val j = json"""{ "foo": 127 }"""
+    j.foo.as[Byte]
+  } returns (127.toByte)
+
+  val `Extract Short` = test {
+    val j = json"""{ "foo": 12345 }"""
+    j.foo.as[Short]
+  } returns (12345.toShort)
+
+  val `Extract Long` = test {
+    val j = json"""{ "foo": 1234567890123456789 }"""
+    j.foo.as[Long]
+  } returns 1234567890123456789L
+
+  val `Extract case class with empty/default option` =  test {
+    import rapture.json.formatters.compact._
+    Json.format(Json(FooDefaultOption()))
+  } returns "{}"
+
+  val `Extract case class with default None param and one Some(..) param` =  test {
+    import rapture.json.formatters.compact._
+    Json.format(Json(FooDefaultOption(param2 = Some(10))))
+  } returns """{"param2":10}"""
+  
+  val `Serialize null` = test { Json(null) } returns json"""{"nullValue":null}""".nullValue
+
+  val `Parse basic JSON null value` = test { json"null" } returns json"null"
+
+  /*val `Serialize sealed trait` = test {
+    Json(Left(50): Either[Int, String])
+  }.returns(json"""{"left":50}""")
+
+  val `Extract sealed trait` = test {
+    json"""{ "left": 50 }""".as[Either[Int, String]]
+  }.returns(Left(50))*/
 }
 
 abstract class MutableJsonTests(ast: JsonBufferAst, parser: Parser[String, JsonBufferAst]) extends TestSuite {
@@ -366,5 +436,4 @@ abstract class MutableJsonTests(ast: JsonBufferAst, parser: Parser[String, JsonB
     source2.inner.newArray += "Hello"
     source2.inner.newArray(0).as[String]
   } returns "Hello"
- 
 }

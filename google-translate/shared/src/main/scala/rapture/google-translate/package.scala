@@ -1,15 +1,20 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+*/
+
 package rapture.i18n.googleTranslate
 
 import rapture.base._
@@ -100,7 +105,7 @@ object GoogleTranslate {
   import rapture.json._, jsonBackends.jawn._
 
   def translate(key: String, text: String, from: String, to: String): String = {
-    val out = uri"https://www.googleapis.com/language/translate/v2?q=${text}&target=${to}&format=text&source=${from}&key=${key}".slurp[Char]
+    val out = uri"https://www.googleapis.com/language/translate/v2?q=$text&target=$to&format=text&source=$from&key=$key".slurp[Char]
     Json.parse(out).data.translations(0).translatedText.as[String]
   }
 }

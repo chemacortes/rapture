@@ -1,21 +1,23 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+ */
 
 package rapture.log
 
 import rapture.core._
-
-import language.experimental.macros
 
 object parts {
 
@@ -23,11 +25,11 @@ object parts {
     def text(level: Int, lineNo: Int, source: String): String
     def fit(level: Int, lineNo: Int, source: String) = {
       val t = text(level, lineNo, source)
-      if(t.length > width) t.substring(0, width)
-      else if(align == Left) t.padTo(width, ' ')
-      else " "*(width - t.length)+t
+      if (t.length > width) t.substring(0, width)
+      else if (align == Left) t.padTo(width, ' ')
+      else " " * (width - t.length) + t
     }
-   
+
     def apply(width: Int = width, align: Alignment = align): Part = new Part(width, align) {
       def text(level: Int, lineNo: Int, source: String) =
         part.text(level, lineNo, source)
@@ -87,4 +89,3 @@ object parts {
     def text(level: Int, lineNo: Int, source: String) = name
   }
 }
-

@@ -1,20 +1,25 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+ */
+
 package rapture.xml.test
 
 import rapture.core._
 import rapture.xml._
-import rapture.data.{Parser, DataTypes}
+import rapture.data.Parser
 import rapture.test._
 
 import scala.util
@@ -91,19 +96,19 @@ abstract class XmlTests(ast: XmlAst, parser: Parser[String, XmlAst]) extends Tes
   val `Extract Double` = test {
     source1.double.as[Double]
   } returns 3.14159
-  
+
   val `Extract Boolean` = test {
     source1.boolean.as[Boolean]
   } returns true
-  
+
   val `Extract String` = test {
     source1.string.as[String]
   } returns "Hello"
-  
+
   val `Extract List[Int]` = test {
     source1.list.item.as[List[Int]]
   } returns List(1, 2, 3)
-  
+
   val `Extract Vector[Int]` = test {
     source1.list.item.as[Vector[Int]]
   } returns Vector(1, 2, 3)
@@ -111,11 +116,11 @@ abstract class XmlTests(ast: XmlAst, parser: Parser[String, XmlAst]) extends Tes
   val `Extract case class` = test {
     source1.foo.as[Foo]
   } returns Foo("test", 1)
-  
+
   val `Extract case class with missing optional value` = test {
     source1.baz.as[Baz]
   } returns Baz("test", None)
-  
+
   val `Extract case class with missing tried value` = test {
     source1.baz.as[Baz2]
   } returns Baz2("test", util.Failure(MissingValueException()))
@@ -123,7 +128,7 @@ abstract class XmlTests(ast: XmlAst, parser: Parser[String, XmlAst]) extends Tes
   val `Extract case class with present optional value` = test {
     source1.baz2.as[Baz]
   } returns Baz("test", Some(7))
-  
+
   val `Extract case class with present tried value` = test {
     source1.baz2.as[Baz2]
   } returns Baz2("test", util.Success(7))
@@ -198,17 +203,16 @@ abstract class XmlTests(ast: XmlAst, parser: Parser[String, XmlAst]) extends Tes
     j.as[Option[String]]
   } returns None*/
 
-
 }
 
 abstract class MutableXmlTests(ast: XmlBufferAst, parser: Parser[String, XmlBufferAst]) extends TestSuite {
- 
+
   implicit def implicitAst: XmlBufferAst = ast
   implicit def implicitParser: Parser[String, XmlBufferAst] = parser
 
   case class Foo(alpha: String, beta: Int)
   case class Bar(foo: Foo, gamma: Double)
-  
+
   val source1 = xmlBuffer"""<source>
     <string>Hello</string>
     <int>42</int>

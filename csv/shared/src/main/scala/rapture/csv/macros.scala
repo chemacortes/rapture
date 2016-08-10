@@ -1,15 +1,20 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+ */
+
 package rapture.csv
 
 import rapture.core._
@@ -27,46 +32,15 @@ object Macros {
 
     val params = declarations(c)(weakTypeOf[T]).collect {
       case m: MethodSymbol if m.isCaseAccessor => m.asMethod
-    }.zipWithIndex.map { case (p, i) =>
+    }.zipWithIndex.map {
+      case (p, i) =>
+        val searchType = appliedType(cellExtractor, List(p.returnType))
+        val inferredImplicit = c.inferImplicitValue(searchType, false, false)
 
-      Apply(
-        Select(
-          Ident(termName(c, "mode")),
-          termName(c, "unwrap")
-        ),
-        List(
-          Apply(
-            Select(
-              c.inferImplicitValue(appliedType(cellExtractor, List(p.returnType)), false, false),
-              termName(c, "extract")
-            ),
-            List(
-              Apply(
-                Select(
-                  Ident(termName(c, "values")),
-                  termName(c, "apply")
-                ),
-                List(Literal(Constant(i)))
-              ),
-              Literal(Constant(i)),
-              Ident(termName(c, "mode"))
-            )
-          )
-        )
-      )
+        q"mode.unwrap($inferredImplicit.extract(values($i), $i, mode))"
     }
-    
-    val construction = c.Expr[T](
-      Apply(
-        Select(
-          New(
-            TypeTree(weakTypeOf[T])
-          ),
-          constructor(c)
-        ),
-        params.to[List]
-      )
-    )
+
+    val construction = c.Expr[T](q"new ${weakTypeOf[T]}(..$params)")
 
     reify {
       new CsvRowExtractor[T] {
@@ -76,4 +50,3 @@ object Macros {
     }
   }
 }
-

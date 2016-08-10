@@ -1,21 +1,23 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+ */
+
 package rapture.data
 
 import rapture.core._
-
-import scala.collection.mutable.{ListBuffer, HashMap}
-import scala.collection.JavaConverters
 
 object DataTypes {
   sealed class DataType(val name: String)
@@ -37,25 +39,25 @@ trait Parser[-Source, +Ast <: DataAst] {
 }
 
 trait DataAst {
- 
+
   /** Dereferences the named element within the JSON object. */
   def dereferenceObject(obj: Any, element: String): Any =
     getObject(obj)(element)
-  
+
   /** Returns at `Iterator[String]` over the names of the elements in the JSON object. */
   def getKeys(obj: Any): Iterator[String] =
     getObject(obj).keys.iterator
- 
+
   /** Gets the indexed element from the parsed JSON array. */
   def dereferenceArray(array: Any, element: Int): Any =
     getArray(array)(element)
-  
+
   /** Tests if the element represents an `Object` */
   def isObject(any: Any): Boolean
-  
+
   /** Tests if the element represents an `Array` */
   def isArray(any: Any): Boolean
- 
+
   def isNull(any: Any): Boolean
 
   /** Extracts a JSON object as a `Map[String, Any]` from the parsed JSON. */
@@ -74,7 +76,7 @@ trait DataAst {
   def fromArray(array: Seq[Any]): Any
 
   def isScalar(any: Any): Boolean
-  
+
   def getString(any: Any): Any
   def isString(any: Any): Boolean
 
@@ -87,4 +89,3 @@ trait MutableDataAst extends DataAst {
   def removeObjectValue(obj: Any, name: String): Any
   def addArrayValue(array: Any, value: Any): Any
 }
-

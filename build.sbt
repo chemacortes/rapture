@@ -5,23 +5,23 @@ enablePlugins(GitBranchPrompt)
 
 lazy val buildSettings = Seq(
   organization := "com.propensive",
-  scalaVersion := "2.11.7",
-  crossScalaVersions := Seq("2.11.7", "2.10.5")
+  scalaVersion := "2.11.8",
+  crossScalaVersions := Seq("2.11.8", "2.10.6")
 )
 
 lazy val commonSettings = Seq(
+  scalafmtConfig in ThisBuild := Some(file(".scalafmt")),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",
     "-feature",
     "-unchecked",
-    "-Xlint",
-    "-Ywarn-dead-code"
+    "-Xfatal-warnings",
+    "-Xlint"
  /*   "-language:existentials",
     "-language:higherKinds",
     "-language:implicitConversions",
     "-language:experimental.macros",
-    "-Xfatal-warnings",
     "-Yinline-warnings",
     "-Yno-adapted-args",
     "-Ywarn-numeric-widen",
@@ -52,14 +52,14 @@ lazy val rapture = project.in(file("."))
 lazy val raptureJVM = project.in(file(".raptureJVM"))
   .settings(moduleName := "rapture")
   .settings(raptureSettings)
-  .aggregate(baseJVM, coreJVM, timeJVM, uriJVM, codecJVM, cryptoJVM, csvJVM, ioJVM, fsJVM, netJVM, httpJVM, mimeJVM, cliJVM, logJVM, i18nJVM, googleTranslateJVM, textJVM, latexJVM, testJVM, dataJVM, xmlJVM, jsonJVM, htmlJVM, domJVM, coreScalazJVM)
-  .dependsOn(baseJVM, coreJVM, timeJVM, uriJVM, codecJVM, cryptoJVM, csvJVM, ioJVM, fsJVM, netJVM, httpJVM, mimeJVM, cliJVM, logJVM, i18nJVM, googleTranslateJVM, textJVM, latexJVM, testJVM, dataJVM, xmlJVM, jsonJVM, htmlJVM, domJVM, coreScalazJVM)
+  .aggregate(baseJVM, coreJVM, timeJVM, uriJVM, codecJVM, cryptoJVM, csvJVM, ioJVM, fsJVM, netJVM, httpJVM, mimeJVM, cliJVM, mailJVM, logJVM, i18nJVM, googleTranslateJVM, textJVM, latexJVM, testJVM, dataJVM, xmlJVM, jsJVM, cssJVM, currencyJVM, jsonJVM, htmlJVM, domJVM, coreScalazJVM, httpJsonJVM)
+  .dependsOn(baseJVM, coreJVM, timeJVM, uriJVM, codecJVM, cryptoJVM, csvJVM, ioJVM, fsJVM, netJVM, httpJVM, mimeJVM, cliJVM, mailJVM, logJVM, i18nJVM, googleTranslateJVM, textJVM, latexJVM, testJVM, dataJVM, xmlJVM, jsJVM, cssJVM, currencyJVM, jsonJVM, htmlJVM, domJVM, coreScalazJVM, httpJsonJVM)
   
 lazy val raptureJS = project.in(file(".raptureJS"))
   .settings(moduleName := "rapture")
   .settings(raptureSettings)
-  .aggregate(baseJS, coreJS, timeJS, uriJS, codecJS, cryptoJS, csvJS, ioJS, fsJS, netJS, httpJS, mimeJS, cliJS, logJS, i18nJS, googleTranslateJS, textJS, latexJS, testJS, dataJS, jsonJS, htmlJS, domJS, coreScalazJS)
-  .dependsOn(baseJS, coreJS, timeJS, uriJS, codecJS, cryptoJS, csvJS, ioJS, fsJS, netJS, httpJS, mimeJS, cliJS, logJS, i18nJS, googleTranslateJS, textJS, latexJS, testJS, dataJS, xmlJS, jsonJS, htmlJS, domJS, coreScalazJS)
+  .aggregate(baseJS, coreJS, timeJS, uriJS, codecJS, cryptoJS, csvJS, ioJS, fsJS, netJS, httpJS, mimeJS, cliJS, mailJS, logJS, i18nJS, googleTranslateJS, textJS, latexJS, testJS, dataJS, jsonJS, htmlJS, domJS, coreScalazJS, httpJsonJS, xmlJS, jsJS, cssJS, currencyJS)
+  .dependsOn(baseJS, coreJS, timeJS, uriJS, codecJS, cryptoJS, csvJS, ioJS, fsJS, netJS, httpJS, mimeJS, cliJS, mailJS, logJS, i18nJS, googleTranslateJS, textJS, latexJS, testJS, dataJS, jsonJS, htmlJS, domJS, coreScalazJS, httpJsonJS, xmlJS, jsJS, cssJS, currencyJS)
   .enablePlugins(ScalaJSPlugin)
 
 lazy val raptureExtras = crossProject
@@ -159,9 +159,19 @@ lazy val http = crossProject.dependsOn(net, uri, json, html, fs, log, time)
   .settings(moduleName := "rapture-http")
   .settings(raptureSettings:_*)
   .settings(libraryDependencies += "javax.servlet" % "servlet-api" % "2.5")
+  .settings(libraryDependencies += "org.w3c.css" % "sac" % "1.3")
+  .settings(libraryDependencies += "net.sourceforge.cssparser" % "cssparser" % "0.9.20")
  
 lazy val httpJVM = http.jvm
 lazy val httpJS = http.js
+
+// rapture-http-json
+lazy val `http-json` = crossProject.dependsOn(http, json)
+  .settings(moduleName := "rapture-http-json")
+  .settings(raptureSettings:_*)
+ 
+lazy val httpJsonJVM = `http-json`.jvm
+lazy val httpJsonJS = `http-json`.js
 
 // rapture-http-jetty
 lazy val `http-jetty` = crossProject.dependsOn(http)
@@ -195,6 +205,15 @@ lazy val cli = crossProject.dependsOn(log, fs)
  
 lazy val cliJVM = cli.jvm
 lazy val cliJS = cli.js
+
+// rapture-mail
+lazy val mail = crossProject.dependsOn(io, html, net)
+  .settings(moduleName := "rapture-mail")
+  .settings(raptureSettings:_*)
+  .settings(libraryDependencies += "javax.mail" % "mail" % "1.4")
+ 
+lazy val mailJVM = mail.jvm
+lazy val mailJS = mail.js
 
 // rapture-log
 lazy val log = crossProject.dependsOn(io)
@@ -254,7 +273,7 @@ lazy val domJVM = dom.jvm
 lazy val domJS = dom.js
 
 // rapture-html
-lazy val html = crossProject.dependsOn(net, mime, dom, test)
+lazy val html = crossProject.dependsOn(net, mime, dom, test, js, css)
   .settings(moduleName := "rapture-html")
   .settings(raptureSettings:_*)
  
@@ -277,6 +296,31 @@ lazy val xml = crossProject.dependsOn(data)
 lazy val xmlJVM = xml.jvm
 lazy val xmlJS = xml.js
 
+// rapture-js
+lazy val js = crossProject.dependsOn(data)
+  .settings(moduleName := "rapture-js")
+  .settings(raptureSettings:_*)
+ 
+lazy val jsJVM = js.jvm
+lazy val jsJS = js.js
+
+// rapture-css
+lazy val css = crossProject.dependsOn(data, dom)
+  .settings(moduleName := "rapture-css")
+  .settings(raptureSettings:_*)
+  .settings(libraryDependencies += "net.sourceforge.cssparser" % "cssparser" % "0.9.20")
+ 
+lazy val cssJVM = css.jvm
+lazy val cssJS = css.js
+
+// rapture-currency
+lazy val currency = crossProject.dependsOn(data)
+  .settings(moduleName := "rapture-currency")
+  .settings(raptureSettings:_*)
+ 
+lazy val currencyJVM = currency.jvm
+lazy val currencyJS = currency.js
+
 // rapture-json
 lazy val json = crossProject.dependsOn(data)
   .settings(moduleName := "rapture-json")
@@ -289,8 +333,8 @@ lazy val jsonJS = json.js
 lazy val `json-circe` = crossProject.dependsOn(json)
   .settings(moduleName := "rapture-json-circe")
   .settings(raptureSettings:_*)
-  .settings(libraryDependencies += "io.circe" %% "circe-core" % "0.2.1")
-  .settings(libraryDependencies += "io.circe" %% "circe-jawn" % "0.2.1")
+  .settings(libraryDependencies += "io.circe" %% "circe-core" % "0.4.1")
+  .settings(libraryDependencies += "io.circe" %% "circe-jawn" % "0.4.1")
  
 lazy val jsonCirceJVM = `json-circe`.jvm
 lazy val jsonCirceJS = `json-circe`.js
@@ -307,18 +351,25 @@ lazy val xmlStdlibJS = `xml-stdlib`.js
 lazy val `json-jawn` = crossProject.dependsOn(json)
   .settings(moduleName := "rapture-json-jawn")
   .settings(raptureSettings:_*)
-  .settings(libraryDependencies += "org.spire-math" %% "jawn-parser" % "0.8.2")
-  .settings(libraryDependencies += "org.spire-math" %% "jawn-ast" % "0.8.2")
+  .settings(libraryDependencies += "org.spire-math" %% "jawn-parser" % "0.8.4")
+  .settings(libraryDependencies += "org.spire-math" %% "jawn-ast" % "0.8.4")
  
 lazy val jsonJawnJVM = `json-jawn`.jvm
 lazy val jsonJawnJS = `json-jawn`.js
 
 
+lazy val playJsonDependencies: Seq[Setting[_]] = Seq(
+  libraryDependencies += (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 10)) => "com.typesafe.play" %% "play-json" % "2.4.6"
+    case Some((2, 11)) => "com.typesafe.play" %% "play-json" % "2.5.3"
+  })
+)
+
 // rapture-json-play
 lazy val `json-play` = crossProject.dependsOn(json)
   .settings(moduleName := "rapture-json-play")
-  .settings(raptureSettings:_*)
-  .settings(libraryDependencies += "com.typesafe.play" %% "play-json" % "2.4.2")
+  .settings(raptureSettings: _*)
+  .settings(playJsonDependencies: _*)
  
 lazy val jsonPlayJVM = `json-play`.jvm
 lazy val jsonPlayJS = `json-play`.js
@@ -327,7 +378,7 @@ lazy val jsonPlayJS = `json-play`.js
 lazy val `json-json4s` = crossProject.dependsOn(json)
   .settings(moduleName := "rapture-json-json4s")
   .settings(raptureSettings:_*)
-  .settings(libraryDependencies += "org.json4s" %% "json4s-native" % "3.3.0.RC3")
+  .settings(libraryDependencies += "org.json4s" %% "json4s-native" % "3.3.0")
  
 lazy val jsonJson4sJVM = `json-json4s`.jvm
 lazy val jsonJson4sJS = `json-json4s`.js
@@ -345,7 +396,7 @@ lazy val jsonSprayJS = `json-spray`.js
 lazy val `json-argonaut` = crossProject.dependsOn(json)
   .settings(moduleName := "rapture-json-argonaut")
   .settings(raptureSettings:_*)
-  .settings(libraryDependencies += "io.argonaut" %% "argonaut" % "6.1")
+  .settings(libraryDependencies += "io.argonaut" %% "argonaut" % "6.2-M1")
  
 lazy val jsonArgonautJVM = `json-argonaut`.jvm
 lazy val jsonArgonautJS = `json-argonaut`.js
@@ -354,7 +405,7 @@ lazy val jsonArgonautJS = `json-argonaut`.js
 lazy val `json-jackson` = crossProject.dependsOn(json)
   .settings(moduleName := "rapture-json-jackson")
   .settings(raptureSettings:_*)
-  .settings(libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.3")
+  .settings(libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % "2.7.2")
  
 lazy val jsonJacksonJVM = `json-jackson`.jvm
 lazy val jsonJacksonJS = `json-jackson`.js
@@ -376,6 +427,14 @@ lazy val `json-test` = crossProject.dependsOn(`json-jawn`, `json-lift`, `json-sp
  
 lazy val jsonTestJVM = `json-test`.jvm
 lazy val jsonTestJS = `json-test`.js
+
+// rapture-css-test
+lazy val `css-test` = crossProject.dependsOn(css, html, test)
+  .settings(moduleName := "rapture-css-test")
+  .settings(raptureSettings:_*)
+ 
+lazy val cssTestJVM = `css-test`.jvm
+lazy val cssTestJS = `css-test`.js
 
 // rapture-xml-test
 lazy val `xml-test` = crossProject.dependsOn(`xml-stdlib`, test)

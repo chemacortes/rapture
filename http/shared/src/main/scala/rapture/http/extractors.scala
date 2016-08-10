@@ -1,29 +1,35 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
-package rapture.http
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
 
-import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.ListMap
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+ */
+
+package rapture.http
 
 import rapture.mime._
 import rapture.codec._
 import rapture.uri._
 
-object RequestExtractors {
+object requestExtractors {
 
   /** A standard implementaiton of a response which confirms cross-domain access corntrol */
   def accessControlAllowOrigin(domain: String)(implicit enc: Encoding): Response =
-    StreamResponse(200, ("Access-Control-Allow-Origin" -> domain) :: ("Access-Control-Allow-Credentials" -> "true") :: Response.NoCache, MimeTypes.`application/xml`, v => ())(enc)
+    StreamResponse(
+        200,
+        ("Access-Control-Allow-Origin" -> domain) :: ("Access-Control-Allow-Credentials" -> "true") :: Response.NoCache,
+        MimeTypes.`application/xml`,
+        v => ())(enc)
 
   /** Method for creating new HTTP header extractors for requests */
   def withHttpHeader(h: String) = new HttpHeader(h)
@@ -37,7 +43,7 @@ object RequestExtractors {
   class GetCookie(p: Symbol) {
     def unapply(r: HttpRequest): Option[String] = r.cookie(p)
   }
- 
+
   object & {
     def unapply(r: HttpRequest): Option[(HttpRequest, HttpRequest)] = Some((r, r))
   }
@@ -51,7 +57,11 @@ object RequestExtractors {
   def getCookie(c: Symbol) = new GetCookie(c)
   def hasCookie(c: Symbol) = new HasCookie(c)
 
-  object AsInt { def unapply(s: String): Option[Int] = try Some(s.toInt) catch { case e: Exception => None } }
+  object AsInt {
+    def unapply(s: String): Option[Int] =
+      try Some(s.toInt)
+      catch { case e: Exception => None }
+  }
 
   /** Extract the path from the request */
   object Path { def unapply(r: HttpRequest): Option[RootedPath] = Some(r.path) }
@@ -62,8 +72,7 @@ object RequestExtractors {
   /** Method for creating new parameter extractors for requests */
   def getParam(p: Symbol) = new GetParam(p)
   def hasParam(p: Symbol) = new HasParam(p)
-  
+
   class HttpHeader(p: String) { def unapply(r: HttpRequest): Option[String] = r.headers.get(p).flatMap(_.headOption) }
 
 }
-

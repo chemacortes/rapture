@@ -1,19 +1,27 @@
-/******************************************************************************************************************\
-* Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.                                          *
-*                                                                                                                  *
-* The primary distribution site is http://rapture.io/                                                              *
-*                                                                                                                  *
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance   *
-* with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.            *
-*                                                                                                                  *
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed *
-* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License    *
-* for the specific language governing permissions and limitations under the License.                               *
-\******************************************************************************************************************/
+/*
+  Rapture, version 2.0.0. Copyright 2010-2016 Jon Pretty, Propensive Ltd.
+
+  The primary distribution site is
+  
+    http://rapture.io/
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is
+  distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+*/
+
 package rapture.html
 
 import rapture.uri._
 import rapture.net._
+import rapture.js._
+
+import dynamicCssReferencing._
 
 object Tests {
 
@@ -55,23 +63,23 @@ object Tests {
 
   def `Script has defer attribute` = Script(defer = true)
 
-  def `Body has onbeforeunload attribute` = Body(onbeforeunload = "foo()")
+  def `Body has onbeforeunload attribute` = Body(onbeforeunload = js"foo()")
 
-  def `Body has onerror attribute` = Body(onerror = "foo()")
+  def `Body has onerror attribute` = Body(onerror = js"foo()")
 
-  def `Body has onhashchange attribute` = Body(onhashchange = "foo()")
+  def `Body has onhashchange attribute` = Body(onhashchange = js"foo()")
 
-  def `Body has onmessage attribute` = Body(onmessage = "foo()")
+  def `Body has onmessage attribute` = Body(onmessage = js"foo()")
 
-  def `Body has onoffline attribute` = Body(onoffline = "foo()")
+  def `Body has onoffline attribute` = Body(onoffline = js"foo()")
 
-  def `Body has onpopstate attribute` = Body(onpopstate = "foo()")
+  def `Body has onpopstate attribute` = Body(onpopstate = js"foo()")
 
-  def `Body has onresize attribute` = Body(onresize = "foo()")
+  def `Body has onresize attribute` = Body(onresize = js"foo()")
 
-  def `Body has onstorage attribute` = Body(onstorage = "foo()")
+  def `Body has onstorage attribute` = Body(onstorage = js"foo()")
 
-  def `Body has onunload attribute` = Body(onunload = "foo()")
+  def `Body has onunload attribute` = Body(onunload = js"foo()")
 
   def `Ol has reversed attribute` = Ol(reversed = true)
 
@@ -157,11 +165,10 @@ object Tests {
 
   def `Label has for attribute` = Label(`for` = 'foo)
 
+  def `Fieldset can contain Legend` = Fieldset(Legend("foo"))
+
   //def `Should fail` = Html(src = "foo")
 
-  def `Get Tds` = {
-    val table = Table(Tbody(Tr(Td, Td, Td), Tr(Td, Td, Td)))
-    println(table \ Tbody \ Tr \ Td)
-  }
+  def `Get Tds` = Table(Tbody(Tr(Td, Td, Td), Tr(Td, Td, Td)))
 
 }
